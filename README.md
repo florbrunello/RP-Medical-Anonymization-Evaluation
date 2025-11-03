@@ -1,39 +1,61 @@
 # Academic Research Project
-## Evaluation of Different Approaches to Medical Text Anonymization in Spanish
+## Evaluation of different approaches to anonymization of Spanish clinical texts
 
-This project evaluates and compares different approaches for Named Entity Recognition (NER) in Spanish medical documents, using four specialized datasets and three types of models.
+**Summary**
 
-## Project Structure
+This project evaluates and compares different approaches for Named Entity Recognition (NER) in Spanish medical documents, using four specialized datasets and three types of models. This repository contains the datasets, code and experiments for the research project "Evaluation of different approaches to anonymization of Spanish clinical texts". The project compares three families of solutions for de-identification of clinical text: rule-based regular expressions (REGEX), BiLSTM-CRF sequence models, and large language models (Llama 3.1). Experiments were executed on four datasets (two public and two synthetic). Everything required to reproduce the experiments is provided.
 
-### Datasets (`Datasets/`)
+> **Note:** The Spanish version of this README is available in `README_es.md`.
+
+## Repository structure
+
+```
+README.md                    <- this file (English)
+README_es.md                 <- Spanish version of the README
+Datasets/                    <- .txt, .ann, .xml (BRAT/XML)
+  ├─ MEDDOCAN/
+  ├─ SPG/
+  ├─ SPGExtended/
+  └─ CARMEN-I/   (restricted by license)
+Models/
+  ├─ REGEX/
+  ├─ BiLSTM-CRF/
+  └─ Llama3.1/
+Results/
+  ├─ results_dev.xlsx
+  ├─ results_test.xlsx
+  └─ plots_dev/
+  └─ plots_dev/
+Models/Scripts/
+  └─ confusion_matrix_generator_global.py
+LICENSE
+```
+
+## Datasets (`Datasets/`)
 Contains four annotated medical datasets in BRAT format:
 
-- **MEDDOCAN**: 1,000 medical documents (500 train, 250 dev, 250 test)
-- **SPG**: 1,000 documents obtained from the Synthetic Patient Generator module (500 train, 250 dev, 250 test)  
-- **SPGExtended**: 448 extended SPG documents (358 train, 45 dev, 45 test)
-- **CARMEN-I**: 1,697 clinical case documents (847 train, 425 dev, 425 test)
+- **MEDDOCAN**: public corpus of 1,000 medical documents (500 train, 250 dev, 250 test). Used in IberLEF, MEDDOCAN. 
+- **SPG**: 1,000 synthetic clinical records generated with the Synthetic Patient Generator module (500 train, 250 dev, 250 test).  
+- **SPGExtended**: 448 urated synthetic records produced by extending SPG outputs and performing automatic/manual curation (358 train, 45 dev, 45 test).
+- **CARMEN-I**: subset of 1,697 clinical case documents in Spanish (847 train, 425 dev, 425 test). This dataset is license-restricted and therefore not included in this repository. The dataset can be accessed through PhysioNet: https://physionet.org/content/carmen-i/1.0.1/
 
-Each dataset includes `.txt` (text) and `.ann` (annotation) files in BRAT format.
 
-### Note about CARMEN-I
-Due to licensing reasons, everything related to CARMEN-I is not public in this repository. The dataset can be accessed through PhysioNet: https://physionet.org/content/carmen-i/1.0.1/
-
-### Models (`Models/`)
+## Models (`Models/`)
 Implementation and evaluation of three different approaches:
 
 ##### 1. **REGEX** - Symbolic rules based on domain knowledge using regular expressions
-- Pattern and rule-based approach
-- Python implementation with text processing
-- Execution files in each subfolder (`ejecucion.md`)
+- Rule-based patterns developed and collected from the ARPHAI community.
+- Outputs are post-processed and converted to BRAT format for evaluation.
+- Strengths: interpretability and low computational cost. Weaknesses: limited recall and brittle behaviour on variable text.
 
 ##### 2. **BiLSTM-CRF** - Recurrent Neural Network
-- Deep learning model with BiLSTM + CRF architecture
-- Based on word embeddings and context
+- Implementation follows a Bi-directional LSTM + CRF architecture (inspired by Ma & Hovy and Saluja et al.).
+- Requires word/subword embeddings, tokenization and supervised training.
+- Offers a good trade-off between performance and computational efficiency.
 
-##### 3. **Llama3.1** - Large Language Model
-- Uses Llama 3.1 model for NER
-- Implementation with prompts (one-shot)
-- Direct evaluation on the datasets
+##### 3. **Llama 3.1** - Large Language Model
+- Uses Llama 3.1 model for NER. Used via prompting (one-/few-shot) to generate inline annotations (XML) which are converted to BRAT for scoring.
+- LLMs perform strongly on text similar to their training distribution but may show decreased robustness on out-of-distribution real clinical records. Risks include hallucinations and inconsistent offset handling.
 
 ## Results
 Results are located in the `Results/` folder:
@@ -66,3 +88,7 @@ python3 confusion_matrix_generator_global.py [MODEL] --partition [dev/test/both]
 This project is licensed under **CC0 1.0 Universal** (Creative Commons Zero) - see the [LICENSE](LICENSE) file for more details.
 
 The CC0 license allows free use, modification and distribution of the code without restrictions, effectively dedicating the work to the public domain.
+
+## Acknowledgements
+
+This work used compute resources from UNC Supercomputing (CCAD) and resources from the ARPHAI community. See the thesis acknowledgements for the full list of contributors and funders.
